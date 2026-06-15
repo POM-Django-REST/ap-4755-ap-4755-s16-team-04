@@ -1,0 +1,13 @@
+{% if book %}
+<h1>Edit Book: {{ book.name }}</h1>
+{% else %}
+<h1>Add Book</h1>
+{% endif %}
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Save</button>
+</form>
+
+<p><a href="{% url 'books_list' %}">Back to list</a></p>

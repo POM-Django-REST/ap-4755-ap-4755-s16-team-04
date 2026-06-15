@@ -1,0 +1,22 @@
+<h1>{{ book.name }}</h1>
+
+<p>{{ book.description }}</p>
+
+<p>Available copies: {{ book.count }}</p>
+
+<h3>Authors</h3>
+
+<ul>
+    {% for author in book.authors.all %}
+        <li>{{ author.name }}</li>
+    {% endfor %}
+</ul>
+
+<a href="{% url 'book_edit' book.id %}">Edit Book</a>
+
+<form method="post" action="{% url 'create_order' book.id %}">
+    {% csrf_token %}
+    <button type="submit">Borrow Book</button>
+</form>
+
+<p><a href="{% url 'books_list' %}">Back to list</a></p>

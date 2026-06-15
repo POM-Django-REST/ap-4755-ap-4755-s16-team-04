@@ -1,0 +1,15 @@
+{% if order %}
+<h1>Edit Order #{{ order.id }}</h1>
+<p>Book: {{ order.book.name }}</p>
+<p>User: {{ order.user.email }}</p>
+{% else %}
+<h1>Order Book: {{ book.name }}</h1>
+{% endif %}
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Save</button>
+</form>
+
+<p><a href="{% url 'orders_list' %}">Back to orders</a></p>

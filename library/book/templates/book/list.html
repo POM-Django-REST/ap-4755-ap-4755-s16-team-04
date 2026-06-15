@@ -1,0 +1,37 @@
+<h1>Books</h1>
+
+<a href="{% url 'book_create' %}">Add Book</a>
+
+<form method="get">
+    {{ form.as_p }}
+    <button type="submit">Search</button>
+</form>
+
+<hr>
+
+{% for book in books %}
+
+<div>
+    <h3>
+        <a href="{% url 'book_detail' book.id %}">{{ book.name }}</a>
+    </h3>
+    <p>Available copies: {{ book.count }}</p>
+
+    <a href="{% url 'book_edit' book.id %}">Edit</a>
+
+    {% if book.count > 0 %}
+        <form method="post" action="{% url 'create_order' book.id %}">
+            {% csrf_token %}
+            <button type="submit">Order book</button>
+        </form>
+    {% else %}
+        <p>Out of stock</p>
+    {% endif %}
+</div>
+
+<hr>
+
+{% empty %}
+    <p>No books found.</p>
+
+{% endfor %}

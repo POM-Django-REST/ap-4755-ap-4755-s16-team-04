@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>Реєстрація</title>
+</head>
+<body>
+    <h2>Реєстрація нового користувача</h2>
+
+    {% if form.non_field_errors %}
+        {% for error in form.non_field_errors %}
+            <p style="color: red; font-weight: bold;">{{ error }}</p>
+        {% endfor %}
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+
+        {% for field in form %}
+            <p>
+                <label for="{{ field.id_for_label }}">{{ field.label }}:</label><br>
+                {{ field }}
+
+                {% if field.errors %}
+                    <br><span style="color: red; font-size: 0.85em;">{{ field.errors.0 }}</span>
+                {% endif %}
+            </p>
+        {% endfor %}
+
+        <button type="submit">Зареєструватися</button>
+    </form>
+
+    <p>Вже маєте акаунт? <a href="/auth/login/">Увійти</a></p>
+</body>
+</html>
