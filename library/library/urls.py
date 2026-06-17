@@ -7,8 +7,8 @@ urlpatterns = [
     path('auth/', include('authentication.urls')),
     path('users/', include('users.urls')),
     path('authors/', include('author.urls')),
-    path('books/', include('book.urls')),
-    path('orders/', include('order.urls')),
+    path('api/v1/book/', include('book.urls')),
+    path('api/v1/order/', include('order.urls')),
 
 
     path('', RedirectView.as_view(url='books/', permanent=False)),

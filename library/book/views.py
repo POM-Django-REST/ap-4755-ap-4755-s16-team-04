@@ -1,64 +1,72 @@
-from django.shortcuts import render, redirect, get_object_or_404
-from django.db.models import Q
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
 
 from .models import Book
-from order.models import Order
-from .forms import BookSearchForm, BookForm
+from .serializers import BookSerializer
 
 
-def books_list(request):
-    books = Book.objects.all()
+class BookListView(APIView):
 
-    form = BookSearchForm(request.GET)
-    if form.is_valid():
-        title = form.cleaned_data['title']
-        author = form.cleaned_data['author']
+    def get(self, request):
+        books = Book.objects.all()
 
-        if title:
-            books = books.filter(name__icontains=title)
+        serializer = BookSerializer(books, many=True)
 
-        if author:
-            words = author.split()
-            author_filter = Q()
-            for word in words:
-                author_filter &= (
-                    Q(authors__name__icontains=word) |
-                    Q(authors__surname__icontains=word)
-                )
-            books = books.filter(author_filter).distinct()
+        return Response(serializer.data)
 
-    return render(request, "book/list.html", {"books": books, "form": form})
+    def post(self, request):
+        serializer = BookSerializer(data=request.data)
 
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-def book_detail(request, id):
-    book = Book.get_by_id(id)
-    return render(request, "book/detail.html", {"book": book})
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
 
+class BookDetailView(APIView):
 
-def user_books(request, user_id):
-    orders = Order.objects.filter(user_id=user_id, end_at=None)
-    books = [order.book for order in orders]
-    return render(request, "book/user_books.html", {"books": books})
+    def get(self, request, book_id):
+        book = Book.get_by_id(book_id)
 
+        if not book:
+            return Response(
+                {'error': 'Book not found'},
+                status=status.HTTP_404_NOT_FOUND
+            )
 
-def book_create(request):
-    if request.method == 'POST':
-        form = BookForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('books_list')
-    else:
-        form = BookForm()
-    return render(request, 'book/book_form.html', {'form': form})
+        serializer = BookSerializer(book)
+        return Response(serializer.data)
 
+    def put(self, request, book_id):
+        book = Book.get_by_id(book_id)
 
-def book_edit(request, id):
-    book = get_object_or_404(Book, id=id)
-    if request.method == 'POST':
-        form = BookForm(request.POST, instance=book)
-        if form.is_valid():
-            form.save()
-            return redirect('book_detail', id=book.id)
-    else:
-        form = BookForm(instance=book)
-    return render(request, 'book/book_form.html', {'form': form, 'book': book})
+        if not book:
+            return Response(
+                {'error': 'Book not found'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        serializer = BookSerializer(instance=book, data=request.data)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, book_id):
+        book = Book.get_by_id(book_id)
+
+        if not book:
+            return Response(
+                {'error': 'Book not found'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        Book.delete_by_id(book_id)
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    
+
