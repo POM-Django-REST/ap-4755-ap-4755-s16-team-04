@@ -2,12 +2,18 @@ from django.shortcuts import render, redirect, get_object_or_404
 from .models import Author
 from .forms import AuthorForm
 
+
+from rest_framework import viewsets
+from .serializers import AuthorSerializer
+
+
+
+
 def authors_list_view(request):
     authors = Author.objects.all()
     return render(request, 'author/authors_list.html', {'authors': authors})
 
 def author_create_view(request):
-
     if not request.user.is_authenticated or (
             not request.user.is_superuser and getattr(request.user, 'role', None) != 1):
         return redirect('login')
@@ -45,15 +51,18 @@ def author_edit_view(request, author_id):
     author = get_object_or_404(Author, id=author_id)
 
     if request.method == 'POST':
-
         form = AuthorForm(request.POST, instance=author)
         if form.is_valid():
             form.save()
             return redirect('authors_list')
     else:
-
         form = AuthorForm(instance=author)
-
 
     return render(request, 'author/author_form.html', {'form': form, 'author': author})
 
+
+
+
+class AuthorViewSet(viewsets.ModelViewSet):
+    queryset = Author.objects.all()
+    serializer_class = AuthorSerializer
