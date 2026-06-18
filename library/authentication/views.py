@@ -4,6 +4,10 @@ from django.contrib.auth.decorators import login_required
 from .models import CustomUser
 from .forms import RegisterForm, LoginForm  # Наші нові форми
 
+# ---- Нові імпорти для Django REST Framework (Спринт 16) ----
+from rest_framework import viewsets
+from .serializers import UserSerializer
+# ------------------------------------------------------------
 
 def register_view(request):
     if request.method == 'POST':
@@ -52,3 +56,10 @@ def logout_view(request):
 @login_required(login_url='login')
 def dashboard_view(request):
     return render(request, 'authentication/dashboard.html')
+
+
+
+
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = CustomUser.objects.all()  # Пряме і правильне звернення до вашої моделі
+    serializer_class = UserSerializer
